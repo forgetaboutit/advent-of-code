@@ -10,6 +10,12 @@ main = do
   run2020
   run2022
 
+run2020 :: IO ()
+run2020 = do
+  printYearHeading 2020
+
+  runDay 1 Day202001.run
+
 run2022 :: IO ()
 run2022 = do
   printYearHeading 2022
