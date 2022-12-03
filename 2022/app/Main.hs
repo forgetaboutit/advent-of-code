@@ -2,19 +2,35 @@ module Main (main) where
 
 import Day1 qualified
 import Day2 qualified
+import Day202001 qualified
+import Day202203 qualified
 
 main :: IO ()
 main = do
+  run2020
+  run2022
+
+run2022 :: IO ()
+run2022 = do
+  printYearHeading 2022
   runDay 1 Day1.run
   runDay 2 Day2.run
+  runDay 3 Day202203.run
+
+printYearHeading :: Int -> IO ()
+printYearHeading year = do
+  print year
+  putStrLn $ textUnderline $ show year
+  putStrLn ""
 
 runDay :: Int -> IO () -> IO ()
 runDay day run = do
   putStrLn dayText
-  putStrLn dayUnderline
+  putStrLn $ textUnderline dayText
   run
   putStrLn ""
-
   where
     dayText = "Day " ++ show day
-    dayUnderline = replicate (length dayText) '='
+
+textUnderline :: String -> String
+textUnderline text = replicate (length text) '='
