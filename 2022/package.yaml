@@ -23,6 +23,7 @@ dependencies:
 - text
 - parsec
 - unordered-containers
+- ilist
 
 ghc-options:
 - -Wall
