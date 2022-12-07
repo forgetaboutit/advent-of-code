@@ -1,4 +1,4 @@
-module Day2 (run) where
+module Day202202 (run) where
 
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -91,4 +91,4 @@ parseOutcome "Z" = Win
 parseOutcome unknown = error $ "Undefined outcome: '" ++ show unknown ++ "'"
 
 readInput :: IO T.Text
-readInput = TIO.readFile "./inputs/day2.txt"
+readInput = TIO.readFile "./inputs/day202202.txt"

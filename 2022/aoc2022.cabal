@@ -24,9 +24,9 @@ source-repository head
 
 library
   exposed-modules:
-      Day1
-      Day2
       Day202001
+      Day202201
+      Day202202
       Day202203
       Day202204
       Day202205

@@ -1,4 +1,4 @@
-module Day1 (run) where
+module Day202201 (run) where
 
 import Data.List (sortOn)
 import Data.Ord (Down (Down))
@@ -26,7 +26,7 @@ sumByGroup = fmap sum
 
 readGroups :: IO [[Int]]
 readGroups = do
-  groupLines <$> TIO.readFile "./inputs/day1.txt"
+  groupLines <$> TIO.readFile "./inputs/day202201.txt"
   where
     groupLines = parseNestedInts . split "" . T.splitOn "\n"
     parseNestedInts = (map . map) (read . T.unpack)

@@ -1,8 +1,8 @@
 module Main (main) where
 
-import Day1 qualified
-import Day2 qualified
 import Day202001 qualified
+import Day202201 qualified
+import Day202202 qualified
 import Day202203 qualified
 import Day202204 qualified
 import Day202205 qualified
@@ -23,8 +23,8 @@ run2020 = do
 run2022 :: IO ()
 run2022 = do
   printYearHeading 2022
-  runDay 1 Day1.run
-  runDay 2 Day2.run
+  runDay 1 Day202201.run
+  runDay 2 Day202202.run
   runDay 3 Day202203.run
   runDay 4 Day202204.run
   runDay 5 Day202205.run
