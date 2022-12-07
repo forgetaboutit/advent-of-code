@@ -23,6 +23,7 @@ dependencies:
 - text
 - parsec
 - unordered-containers
+- containers
 - ilist
 
 ghc-options:

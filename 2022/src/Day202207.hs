@@ -3,7 +3,6 @@ module Day202207 (run) where
 import Data.Functor (($>))
 import Data.Functor.Identity (Identity)
 import Data.HashMap.Strict qualified as HM
-import Data.Maybe (mapMaybe)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Text.Parsec qualified as Parsec
@@ -14,8 +13,8 @@ run = do
   let evalledFs = evalCmds $ parseInput input
   let tree = toTree evalledFs
 
-  print $ totalSmallDirsSize' tree
-  print $ smallestDeletableDirSize' tree
+  print $ totalSmallDirsSize tree
+  print $ smallestDeletableDirSize tree
 
 type Path = [T.Text]
 
@@ -31,19 +30,14 @@ type FsTree = Tree [FileSize]
 foldFs :: (FsTree -> a -> a) -> a -> FsTree -> a
 foldFs f a tree@(Tree _ leaves) = f tree $ foldr (flip (foldFs f)) a leaves
 
-smallestDeletableDirSize' :: FsTree -> Maybe Int
-smallestDeletableDirSize' tree = foldFs findFolder Nothing tree
+smallestDeletableDirSize :: FsTree -> Int
+smallestDeletableDirSize tree = foldFs findFolder stillRequiredFreeSpace tree
   where
-    findFolder t Nothing =
-      let ourSize = treeSize t
-       in if ourSize >= stillRequiredFreeSpace
-            then Just ourSize
-            else Nothing
-    findFolder t (Just size) =
+    findFolder t size =
       let ourSize = treeSize t
        in if ourSize < size && ourSize >= stillRequiredFreeSpace
-            then Just ourSize
-            else Just size
+            then ourSize
+            else size
 
     totalUsedSpace = treeSize tree
     requiredFreeSpace = 30000000
@@ -51,8 +45,8 @@ smallestDeletableDirSize' tree = foldFs findFolder Nothing tree
     freeSpace = totalFsSpace - totalUsedSpace
     stillRequiredFreeSpace = requiredFreeSpace - freeSpace
 
-totalSmallDirsSize' :: FsTree -> Int
-totalSmallDirsSize' = foldFs sizeFold 0
+totalSmallDirsSize :: FsTree -> Int
+totalSmallDirsSize = foldFs sizeFold 0
   where
     sizeFold tree a =
       let size = treeSize tree
@@ -66,22 +60,21 @@ treeSize (Tree fs dirs) =
   sum fs + sum (treeSize <$> dirs)
 
 toTree :: FsState -> FsTree
-toTree fsState = go (atKey [] fsState) []
+toTree fsState = go []
   where
-    go fs bc =
-      let subDirs = findDirs fs
-          subFiles = findFiles fs
-          subTrees = map (\dir -> go (atKey (dir : bc) fsState) (dir : bc)) subDirs
+    go breadcrumbs =
+      let files = atKey breadcrumbs fsState
+          (subFiles, subDirs) = partition files
+          subTrees = map (recurseDir breadcrumbs) subDirs
        in Tree subFiles subTrees
 
-    findDirs = mapMaybe matchDir
-    findFiles = mapMaybe matchFile
+    recurseDir breadcrumbs dir = go (dir : breadcrumbs)
 
-    matchFile (File size _) = Just size
-    matchFile _ = Nothing
+    partition files = partitionRec files [] []
 
-    matchDir (Dir dirName) = Just dirName
-    matchDir _ = Nothing
+    partitionRec [] as bs = (as, bs)
+    partitionRec ((File size _) : xs) as bs = partitionRec xs (size : as) bs
+    partitionRec ((Dir dirName) : xs) as bs = partitionRec xs as (dirName : bs)
 
 atKey :: Path -> FsState -> [FileOrDir]
 atKey p fsState = case HM.lookup p fsState of
