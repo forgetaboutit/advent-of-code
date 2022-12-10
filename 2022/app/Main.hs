@@ -10,6 +10,7 @@ import Day202206 qualified
 import Day202207 qualified
 import Day202208 qualified
 import Day202209 qualified
+import Day202210 qualified
 
 main :: IO ()
 main = do
@@ -34,6 +35,7 @@ run2022 = do
   runDay 7 Day202207.run
   runDay 8 Day202208.run
   runDay 9 Day202209.run
+  runDay 10 Day202210.run
 
 printYearHeading :: Int -> IO ()
 printYearHeading year = do

@@ -34,6 +34,7 @@ library
       Day202207
       Day202208
       Day202209
+      Day202210
   other-modules:
       Paths_aoc2022
   hs-source-dirs:
