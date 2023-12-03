@@ -186,6 +186,10 @@ public static class Extensions
         => source.JoinIntoString(
             Environment.NewLine.Repeat(newlinesCount));
 
+    public static string[] SplitWithNewline(
+        this string input)
+        => input.Split(Environment.NewLine);
+
     public static string Repeat(
         this string s,
         uint count)

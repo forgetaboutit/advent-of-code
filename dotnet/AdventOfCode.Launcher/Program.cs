@@ -1,3 +1,3 @@
-﻿using AdventOfCode.Impl.AoC2015;
+﻿using AdventOfCode.Impl.AoC2023;
 
-Day05.Solve().Dump();
+Day03.Solve().Dump();
