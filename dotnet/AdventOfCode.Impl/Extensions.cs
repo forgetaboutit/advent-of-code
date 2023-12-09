@@ -11,11 +11,17 @@ public static class Extensions
     {
         var output = title is not null
             ? string.Concat(
-                new string('=', title.Length),
+                '\u250C',
+                new string('\u2500', title.Length),
+                '\u2510',
                 Environment.NewLine,
+                '\u2502',
                 title,
+                '\u2502',
                 Environment.NewLine,
-                new string('=', title.Length),
+                '\u2514',
+                new string('\u2500', title.Length),
+                '\u2518',
                 Environment.NewLine,
                 Format(value))
             : Format(value);
