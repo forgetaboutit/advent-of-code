@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AdventOfCode.Impl;
 
@@ -34,31 +35,94 @@ public static class Extensions
         Func<TIn, TOut> f)
         => f(input);
 
+    public static IEnumerable<IReadOnlyList<T>> Chunk<T>(
+        this IEnumerable<T> source,
+        uint chunksize)
+    {
+        if (chunksize > int.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(chunksize));
+        }
+
+        var currentChunk = new List<T>((int) chunksize);
+
+        foreach (var item in source)
+        {
+            if (currentChunk.Count < chunksize)
+            {
+                currentChunk.Add(item);
+            }
+            else if (currentChunk.Count == chunksize)
+            {
+                yield return currentChunk;
+
+                currentChunk =
+                    new List<T>((int) chunksize)
+                    {
+                        item
+                    };
+            }
+        }
+
+        if (currentChunk.Any())
+        {
+            yield return currentChunk;
+        }
+    }
+
+    /// <summary>
+    ///     Lazily returns sliding windows over a sequence.
+    ///     The algorithm makes sure to never return window slices smaller than the given size.
+    ///     This also means that if the given size is larger than the number of items in the
+    ///     sequence, no window slices are returned.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="source"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
     public static IEnumerable<T[]> Window<T>(
         this IEnumerable<T> source,
         int size)
     {
-        using var e = source.GetEnumerator();
-
-        var window = new T[size];
-        var currentWindowIndex = 0;
-
-        while (true)
+        if (size < 1)
         {
-            while (window.Length < size
-                   && e.MoveNext())
-            {
-                window[currentWindowIndex] = e.Current;
-                currentWindowIndex = (currentWindowIndex + 1) % size;
-            }
+            throw new ArgumentOutOfRangeException(nameof(size), "must be > 0");
+        }
 
-            // We don't have enough items left, so exit
-            if (window.Length < size)
-            {
-                yield break;
-            }
+        // Only get elements from the source when needed
+        using (var e = source.GetEnumerator())
+        {
+            // ReSharper restore PossibleMultipleEnumeration
 
-            yield return window;
+            // A queue allows efficient appends at the end and removals from the head
+            var queue = new Queue<T>(size);
+
+            while (true)
+            {
+                // Get elements lazily from the source
+                while (queue.Count < size
+                       && e.MoveNext())
+                {
+                    queue.Enqueue(e.Current);
+                }
+
+                // Abort when the window has reached the end of the sequence
+                if (queue.Count < size)
+                {
+                    yield break;
+                }
+
+                // Use ToArray() instead of ToList() because Queue(Of T) implements it natively
+                // as a fast array copy.  ToList() would require an enumerator and the extension
+                // method to run, which is slower.
+                yield return queue.ToArray();
+
+                // Throw away the current head so the window moves forward
+                if (queue.Any())
+                {
+                    queue.Dequeue();
+                }
+            }
         }
     }
 
@@ -173,6 +237,26 @@ public static class Extensions
                     return (seen, Maybe.Some(firstOccurrenceSelector(item)));
                 });
 
+    public static IEnumerable<T> Cycle<T>(
+        this IEnumerable<T> source)
+    {
+        var buffer = source.ToArray();
+
+        if (!buffer.Any())
+        {
+            yield break;
+        }
+
+        var index = 0;
+
+        while (true)
+        {
+            yield return buffer[index];
+
+            index = (index + 1) % buffer.Length;
+        }
+    }
+
     public static string JoinIntoString<T>(
         this IEnumerable<T> source,
         string separator)
@@ -200,4 +284,40 @@ public static class Extensions
                 Environment.NewLine,
                 (int) count)
             .ToString();
+
+    public static List<long> ParseLongs(
+        this string s)
+        => new Regex(@"(-?\d+)")
+            .Matches(s)
+            .SelectMany(
+                static mc => mc.Captures.Cast<Group>()
+                    .SelectMany(
+                        static g => g.Success
+                            ? Enumerable.Repeat(long.Parse(g.Value), 1)
+                            : Enumerable.Empty<long>()))
+            .ToList();
+
+    public static List<string> ParseAlphaNum(
+        this string s)
+        => new Regex(@"(\w+)")
+            .Matches(s)
+            .SelectMany(
+                static mc => mc.Captures.Cast<Group>()
+                    .SelectMany(
+                        static g => g.Success
+                            ? Enumerable.Repeat(g.Value, 1)
+                            : Enumerable.Empty<string>()))
+            .ToList();
+
+    public static List<long> ParseLongsIgnoringSpaces(
+        this string s)
+        => new Regex(@"(\d+)")
+            .Matches(s.Replace(" ", ""))
+            .SelectMany(
+                static mc => mc.Captures.Cast<Group>()
+                    .SelectMany(
+                        static g => g.Success
+                            ? Enumerable.Repeat(long.Parse(g.Value), 1)
+                            : Enumerable.Empty<long>()))
+            .ToList();
 }

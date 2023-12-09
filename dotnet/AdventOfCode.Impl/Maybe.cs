@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode.Impl;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AdventOfCode.Impl;
 
 public abstract record Maybe<T>
 {
@@ -15,7 +17,7 @@ public abstract record Maybe<T>
         Func<TResult> none);
 
     public abstract bool TryGet(
-        out T? target);
+        [NotNullWhen(true)] out T? target);
 
     internal sealed record Some(T Value)
         : Maybe<T>
